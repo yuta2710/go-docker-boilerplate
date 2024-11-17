@@ -1,4 +1,4 @@
-FROM golang:1.22.2-alpine as builder
+FROM golang:1.23.3-alpine as builder
 # RUN mkdir /app 
 # ADD . /app 
 WORKDIR /app 
@@ -8,7 +8,8 @@ COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
 # Install compile daemon 
-RUN go install github.com/githubnemo/CompileDaemon@latest
+# RUN go install github.com/githubnemo/CompileDaemon@latest
+RUN go install github.com/air-verse/air@latest
 
 COPY . .
 COPY ./entrypoint.sh /entrypoint.sh 

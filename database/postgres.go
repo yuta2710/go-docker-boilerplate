@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"os"
 	"sync"
 
 	"github.com/yuta_2710/go-clean-arc-reviews/config"
@@ -20,17 +21,23 @@ var (
 
 func NewPostgresDatabase(conf *config.Config) Database {
 	once.Do(func() {
-		dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=%s TimeZone=%s",
-			conf.Db.Host,
-			conf.Db.User,
-			conf.Db.Password,
-			conf.Db.DBName,
-			conf.Db.Port,
-			conf.Db.SSLMode,
-			conf.Db.TimeZone,
-		)
+		host := os.Getenv("POSTGRES_HOST")
+		user := os.Getenv("POSTGRES_USER")
+		password := os.Getenv("POSTGRES_PASSWORD")
+		dbname := os.Getenv("POSTGRES_DB")
+		port := os.Getenv("POSTGRES_PORT")
+		sslMode := os.Getenv("POSTGRES_SSL_MODE")
+		timezone := os.Getenv("POSTGRES_TIMEZONE")
 
-		fmt.Println(dsn)
+		dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=%s",
+			host,
+			user,
+			password,
+			dbname,
+			port,
+			sslMode,
+			timezone,
+		)
 
 		db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 		if err != nil {
