@@ -1,10 +1,6 @@
-CREATE TABLE `users`
-(
-    id   bigint auto_increment,
-    name varchar(255) NOT NULL,
-    PRIMARY KEY (`id`)
+CREATE TABLE users (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
 );
 
-INSERT INTO `users` (`name`)
-VALUES ('Solomon'),
-       ('Menelik');
+INSERT INTO users (name) VALUES ('Solomon'), ('Menelik');

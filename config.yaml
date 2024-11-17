@@ -2,7 +2,7 @@ server:
   port: 8080
   
 db:
-  host: 172.29.0.2 # IP của container
+  host: db  
   port: 5432
   user: postgres
   password: 123456
