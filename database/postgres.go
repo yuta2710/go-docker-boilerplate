@@ -1,0 +1,50 @@
+package database
+
+import (
+	"fmt"
+	"sync"
+
+	"github.com/yuta_2710/go-clean-arc-reviews/config"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+)
+
+type postgresDatabase struct {
+	Db *gorm.DB
+}
+
+var (
+	once       sync.Once
+	dbInstance *postgresDatabase
+)
+
+func NewPostgresDatabase(conf *config.Config) Database {
+	once.Do(func() {
+		dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=%s TimeZone=%s",
+			conf.Db.Host,
+			conf.Db.User,
+			conf.Db.Password,
+			conf.Db.DBName,
+			conf.Db.Port,
+			conf.Db.SSLMode,
+			conf.Db.TimeZone,
+		)
+
+		fmt.Println(dsn)
+
+		db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+		if err != nil {
+			panic("Failed to connect postgres database")
+		} else {
+			fmt.Println("Successfully connected postgres database")
+		}
+
+		dbInstance = &postgresDatabase{db}
+	})
+
+	return dbInstance
+}
+
+func (p *postgresDatabase) GetDb() *gorm.DB {
+	return dbInstance.Db
+}
