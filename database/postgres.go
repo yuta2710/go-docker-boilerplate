@@ -38,8 +38,11 @@ func NewPostgresDatabase(conf *config.Config) Database {
 			sslMode,
 			timezone,
 		)
+		fmt.Println("Concac")
+		fmt.Println(dsn)
 
 		db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+
 		if err != nil {
 			panic("Failed to connect postgres database")
 		} else {

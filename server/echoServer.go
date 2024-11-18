@@ -8,6 +8,10 @@ import (
 	"github.com/labstack/gommon/log"
 	"github.com/yuta_2710/go-clean-arc-reviews/config"
 	"github.com/yuta_2710/go-clean-arc-reviews/database"
+	UserHandler "github.com/yuta_2710/go-clean-arc-reviews/modules/users/handlers"
+	UserRepository "github.com/yuta_2710/go-clean-arc-reviews/modules/users/repositories"
+	UserRouters "github.com/yuta_2710/go-clean-arc-reviews/modules/users/routers"
+	UserUsecase "github.com/yuta_2710/go-clean-arc-reviews/modules/users/usecases"
 )
 
 type echoServer struct {
@@ -31,11 +35,32 @@ func (s *echoServer) Start() {
 	s.app.Use(middleware.Recover())
 	s.app.Use(middleware.Logger())
 
+	root := s.initRootRoutes()
 	// Health check
-	s.app.GET("/v1/health", func(c echo.Context) error {
+	s.app.GET("/health", func(c echo.Context) error {
 		return c.String(200, "Health is OK")
 	})
 
+	// Initiliaze user https
+	s.initUserHttps(root)
+
 	serverUrl := fmt.Sprintf(":%d", s.conf.Server.Port)
 	s.app.Logger.Fatal(s.app.Start(serverUrl))
+}
+
+func (e *echoServer) initUserHttps(root *echo.Group) error {
+	repo := UserRepository.NewUserPostgresRepository(e.db)
+	usecase := UserUsecase.NewUserUsecaseImpl(repo)
+	handler := UserHandler.NewUserHttp(usecase)
+	UserRouters.InitUserRouters(handler, root)
+
+	return nil
+}
+
+func (e *echoServer) initRootRoutes() *echo.Group {
+	// if version == 1 {
+	// 	v := os.Getenv("API_VERSION_1")
+	// 	return e.Group("api/")
+	// }
+	return e.app.Group("api/v1")
 }
