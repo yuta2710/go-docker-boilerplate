@@ -51,10 +51,20 @@ func (ur *UserPostgresRepository) InsertBatch(dtos []*entities.InsertUserDto) er
 	return nil
 }
 
-func (ur *UserPostgresRepository) GetUserById(id string) (*entities.User, error) {
+func (ur *UserPostgresRepository) FindById(id string) (*entities.User, error) {
 	// Get the id
 	var u *entities.User
 	result := ur.db.GetDb().Where("id = ?", id).First(&u)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return u, nil
+}
+
+func (ur *UserPostgresRepository) FindByEmail(email string) (*entities.User, error) {
+	var u *entities.User
+	result := ur.db.GetDb().Where("email = ?", email).First(&u)
 
 	if result.Error != nil {
 		return nil, result.Error

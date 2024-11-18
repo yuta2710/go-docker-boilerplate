@@ -33,10 +33,9 @@ func (u *UserHttp) CreateNewUser(ctx echo.Context) error {
 }
 
 func (u *UserHttp) GetUserById(ctx echo.Context) error {
-	fmt.Println("Get user by ID called")
 	id := ctx.Param("id")
 
-	user, err := u.UserUsecase.GetUserById(id)
+	user, err := u.UserUsecase.FindById(id)
 
 	if err != nil {
 		return shared.Response(ctx, false, http.StatusNotFound, "User not found", nil)

@@ -6,11 +6,12 @@ import (
 	"github.com/yuta_2710/go-clean-arc-reviews/modules/users/entities"
 	"github.com/yuta_2710/go-clean-arc-reviews/modules/users/models"
 	"github.com/yuta_2710/go-clean-arc-reviews/modules/users/repositories"
+	UserRepo "github.com/yuta_2710/go-clean-arc-reviews/modules/users/repositories"
 	"github.com/yuta_2710/go-clean-arc-reviews/shared"
 )
 
 type UserUsecaseImpl struct {
-	userRepo repositories.UserRepository
+	userRepo UserRepo.UserRepository
 }
 
 func (uui *UserUsecaseImpl) InsertNewUser(mod *models.InsertUserRequest) error {
@@ -33,9 +34,9 @@ func (uui *UserUsecaseImpl) InsertNewUser(mod *models.InsertUserRequest) error {
 	return nil
 }
 
-func (uui *UserUsecaseImpl) GetUserById(id string) (*entities.FetchUserDto, error) {
+func (uui *UserUsecaseImpl) FindById(id string) (*entities.FetchUserDto, error) {
 	// Get user from repo
-	user, err := uui.userRepo.GetUserById(id)
+	user, err := uui.userRepo.FindById(id)
 
 	// check err is not nil
 	if err != nil {
@@ -53,6 +54,31 @@ func (uui *UserUsecaseImpl) GetUserById(id string) (*entities.FetchUserDto, erro
 	}
 
 	return userDto, nil
+}
+
+func (uui *UserUsecaseImpl) FindByEmail(email string) (*entities.FetchUserDto, error) {
+	// Get user from repo
+	user, err := uui.userRepo.FindByEmail(email)
+
+	if err != nil {
+		panic("\nUser not found")
+	}
+
+	userDto := PreprocessUserDto(user)
+
+	// Check err is not nil
+	// Mask the ID
+	return userDto, nil
+}
+
+func PreprocessUserDto(ent *entities.User) *entities.FetchUserDto {
+	uid := shared.NewUID(uint32(ent.BaseSQLModel.Id), int(shared.DbTypeUser), 1)
+	return &entities.FetchUserDto{
+		FakeId:    uid.String(),
+		FirstName: ent.FirstName,
+		LastName:  ent.LastName,
+		Email:     ent.Email,
+	}
 }
 
 func NewUserUsecaseImpl(userRepo repositories.UserRepository) UserUseCase {

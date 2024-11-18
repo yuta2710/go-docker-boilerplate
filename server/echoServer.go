@@ -8,6 +8,10 @@ import (
 	"github.com/labstack/gommon/log"
 	"github.com/yuta_2710/go-clean-arc-reviews/config"
 	"github.com/yuta_2710/go-clean-arc-reviews/database"
+	"github.com/yuta_2710/go-clean-arc-reviews/modules/auth/handlers"
+	AuthRouters "github.com/yuta_2710/go-clean-arc-reviews/modules/auth/routers"
+	"github.com/yuta_2710/go-clean-arc-reviews/modules/auth/usecases"
+	TokenRepo "github.com/yuta_2710/go-clean-arc-reviews/modules/token/repositories"
 	UserHandler "github.com/yuta_2710/go-clean-arc-reviews/modules/users/handlers"
 	UserRepository "github.com/yuta_2710/go-clean-arc-reviews/modules/users/repositories"
 	UserRouters "github.com/yuta_2710/go-clean-arc-reviews/modules/users/routers"
@@ -43,6 +47,7 @@ func (s *echoServer) Start() {
 
 	// Initiliaze user https
 	s.initUserHttps(root)
+	s.initAuthHttps(root)
 
 	serverUrl := fmt.Sprintf(":%d", s.conf.Server.Port)
 	s.app.Logger.Fatal(s.app.Start(serverUrl))
@@ -53,6 +58,16 @@ func (e *echoServer) initUserHttps(root *echo.Group) error {
 	usecase := UserUsecase.NewUserUsecaseImpl(repo)
 	handler := UserHandler.NewUserHttp(usecase)
 	UserRouters.InitUserRouters(handler, root)
+
+	return nil
+}
+
+func (e *echoServer) initAuthHttps(root *echo.Group) error {
+	userRepo := UserRepository.NewUserPostgresRepository(e.db)
+	tokenRepo := TokenRepo.NewTokenPostgresRepository(e.db)
+	usecase := usecases.NewAuthUsecaseImpl(userRepo, tokenRepo)
+	handler := handlers.NewAuthHttp(usecase)
+	AuthRouters.InitAuthRouters(handler, root)
 
 	return nil
 }
