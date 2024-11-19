@@ -25,11 +25,13 @@ func (u *UserHttp) CreateNewUser(ctx echo.Context) error {
 	}
 
 	// Call use case from this layer
-	if err := u.UserUsecase.InsertNewUser(body); err != nil {
+	authId, err := u.UserUsecase.InsertNewUser(body)
+
+	if err != nil {
 		return shared.Response(ctx, false, http.StatusBadRequest, "Error inserting account", nil, nil)
 	}
 
-	return shared.Response(ctx, true, http.StatusOK, "Inserted account successfully", nil, nil)
+	return shared.Response(ctx, true, http.StatusOK, "Inserted account successfully", authId, nil)
 }
 
 func (u *UserHttp) GetUserById(ctx echo.Context) error {

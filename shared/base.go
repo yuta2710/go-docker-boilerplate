@@ -1,6 +1,13 @@
 package shared
 
-import "github.com/labstack/echo/v4"
+import (
+	"fmt"
+	"os"
+	"time"
+
+	"github.com/golang-jwt/jwt"
+	"github.com/labstack/echo/v4"
+)
 
 type BaseResponse struct {
 	Success bool        `json:"success"`
@@ -32,4 +39,32 @@ func MapHeaders(ctx echo.Context, headers map[string]string) error {
 	}
 
 	return nil
+}
+
+func TokenProvider(authId string) (string, string, error) {
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"authId": authId,
+		"exp":    time.Now().Add(15 * time.Minute).Unix(),
+	})
+
+	accessSecret := os.Getenv("ACCESS_SECRET")
+	accessTokenString, err := accessToken.SignedString([]byte(accessSecret))
+
+	if err != nil {
+		return "", "", fmt.Errorf("Login failed, something wrong due to processing access token to String type")
+	}
+
+	// Generate refresh token
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"authId": authId,
+		"exp":    time.Now().Add(7 * 24 * time.Hour).Unix(),
+	})
+	refreshSecret := os.Getenv("REFRESH_SECRET")
+	refreshTokenString, err := refreshToken.SignedString([]byte(refreshSecret))
+
+	if err != nil {
+		return "", "", fmt.Errorf("Login failed, something wrong due to processing refresh token to String type")
+	}
+
+	return accessTokenString, refreshTokenString, nil
 }

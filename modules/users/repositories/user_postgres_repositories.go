@@ -14,7 +14,7 @@ type UserPostgresRepository struct {
 	db database.Database
 }
 
-func (ur *UserPostgresRepository) Insert(dto *entities.InsertUserDto) error {
+func (ur *UserPostgresRepository) Insert(dto *entities.InsertUserDto) (string, error) {
 	insert := &entities.User{
 		FirstName: dto.FirstName,
 		LastName:  dto.LastName,
@@ -44,7 +44,7 @@ func (ur *UserPostgresRepository) Insert(dto *entities.InsertUserDto) error {
 	fmt.Println("[INSERTED DATA SUCCESSFULLY]")
 	insert.Mask(shared.DbTypeUser)
 
-	return nil
+	return insert.FakeId.String(), nil
 }
 
 func (ur *UserPostgresRepository) InsertBatch(dtos []*entities.InsertUserDto) error {

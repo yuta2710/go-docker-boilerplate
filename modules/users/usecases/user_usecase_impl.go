@@ -14,7 +14,7 @@ type UserUsecaseImpl struct {
 	userRepo UserRepo.UserRepository
 }
 
-func (uui *UserUsecaseImpl) InsertNewUser(mod *models.InsertUserRequest) error {
+func (uui *UserUsecaseImpl) InsertNewUser(mod *models.InsertUserRequest) (string, error) {
 	insertData := &entities.InsertUserDto{
 		FirstName: mod.FirstName,
 		LastName:  mod.LastName,
@@ -26,12 +26,15 @@ func (uui *UserUsecaseImpl) InsertNewUser(mod *models.InsertUserRequest) error {
 		IsBlocked: false,
 	}
 
-	if err := uui.userRepo.Insert(insertData); err != nil {
-		return err
+	authId, err := uui.userRepo.Insert(insertData)
+
+	if err != nil {
+		return "", err
 	}
 
 	fmt.Println("[CREATE ACCOUNT FROM USECASE LAYER SUCCESSFULLY]")
-	return nil
+
+	return authId, nil
 }
 
 func (uui *UserUsecaseImpl) FindById(id string) (*entities.FetchUserDto, error) {

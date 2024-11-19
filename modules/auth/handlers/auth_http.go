@@ -25,7 +25,6 @@ func (ahp *AuthHttp) Login(ctx echo.Context) error {
 		return shared.Response(ctx, false, http.StatusBadRequest, "Invalid login request body", nil, nil)
 
 	}
-	fmt.Println(body)
 
 	authResp, err := ahp.AuthUsecase.Login(body)
 
@@ -68,7 +67,48 @@ func (ahp *AuthHttp) Login(ctx echo.Context) error {
 }
 
 func (ahp *AuthHttp) SignUp(ctx echo.Context) error {
-	return nil
+	body := new(models.SignUpRequest)
+
+	if err := ctx.Bind(body); err != nil {
+		return err
+	}
+
+	// get repo
+	authResp, err := ahp.AuthUsecase.SignUp(body)
+
+	if err != nil {
+		return err
+	}
+
+	authorization := fmt.Sprintf("Bearer %s", authResp.AccessToken)
+	headers := map[string]string{
+		"Content-Type":  "application/json",
+		"Authorization": authorization,
+		"Custom-Header": "CustomValue",
+	}
+	shared.MapHeaders(ctx, headers)
+	refreshTokenCookie := &http.Cookie{
+		Name:     "REFRESH_TOKEN",
+		Value:    authResp.RefreshToken,
+		Path:     "/",
+		Expires:  time.Now().Add(7 * 24 * time.Hour),
+		HttpOnly: true,
+		Secure:   true, // Set to true in production with HTTPS
+	}
+
+	ctx.SetCookie(refreshTokenCookie)
+
+	return shared.Response(
+		ctx,
+		true,
+		http.StatusOK,
+		"Sign Up successfully",
+		&models.AuthResponse{
+			AccessToken:  authResp.AccessToken,
+			RefreshToken: authResp.RefreshToken,
+		},
+		headers,
+	)
 }
 func (ahp *AuthHttp) Profile(ctx echo.Context) error {
 	user := ctx.Get("user").(*entities.FetchUserDto)

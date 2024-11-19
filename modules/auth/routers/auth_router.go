@@ -11,6 +11,7 @@ func InitAuthRouters(http handlers.AuthHandler, userRepo repositories.UserReposi
 	// ROUTE_VAL := "/auth"
 	publicRoutes := routes.Group("/auth")
 	publicRoutes.POST("/login", http.Login)
+	publicRoutes.POST("/signup", http.SignUp)
 	// fmt.Println("Login started....")
 
 	protectedRoutes := routes.Group("/auth")
