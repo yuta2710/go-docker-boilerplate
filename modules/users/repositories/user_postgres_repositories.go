@@ -53,6 +53,8 @@ func (ur *UserPostgresRepository) InsertBatch(dtos []*entities.InsertUserDto) er
 
 func (ur *UserPostgresRepository) FindById(id string) (*entities.User, error) {
 	// Get the id
+	fmt.Println("Dit me")
+	fmt.Println(id)
 	var u *entities.User
 	result := ur.db.GetDb().Where("id = ?", id).First(&u)
 

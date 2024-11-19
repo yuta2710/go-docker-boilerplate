@@ -26,10 +26,10 @@ func (u *UserHttp) CreateNewUser(ctx echo.Context) error {
 
 	// Call use case from this layer
 	if err := u.UserUsecase.InsertNewUser(body); err != nil {
-		return shared.Response(ctx, false, http.StatusBadRequest, "Error inserting account", nil)
+		return shared.Response(ctx, false, http.StatusBadRequest, "Error inserting account", nil, nil)
 	}
 
-	return shared.Response(ctx, true, http.StatusOK, "Inserted account successfully", nil)
+	return shared.Response(ctx, true, http.StatusOK, "Inserted account successfully", nil, nil)
 }
 
 func (u *UserHttp) GetUserById(ctx echo.Context) error {
@@ -38,10 +38,10 @@ func (u *UserHttp) GetUserById(ctx echo.Context) error {
 	user, err := u.UserUsecase.FindById(id)
 
 	if err != nil {
-		return shared.Response(ctx, false, http.StatusNotFound, "User not found", nil)
+		return shared.Response(ctx, false, http.StatusNotFound, "User not found", nil, nil)
 	}
 
-	return shared.Response(ctx, true, http.StatusOK, "Successfully fetched", user)
+	return shared.Response(ctx, true, http.StatusOK, "Successfully fetched", user, nil)
 }
 
 func NewUserHttp(uc usecases.UserUseCase) UserHandler {

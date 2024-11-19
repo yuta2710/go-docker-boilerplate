@@ -75,6 +75,27 @@ func DecomposeUID(s string) (UID, error) {
 	return u, nil
 }
 
+func DecomposeUidV2(encodedUID string) (UID, error) {
+	// Decode Base58 string
+	decodedBytes := base58.Decode(encodedUID)
+	if len(decodedBytes) == 0 {
+		return UID{}, errors.New("invalid Base58 string")
+	}
+
+	// Convert decoded bytes to uint64
+	uid, err := strconv.ParseUint(string(decodedBytes), 10, 64)
+	if err != nil {
+		return UID{}, fmt.Errorf("error parsing UID: %w", err)
+	}
+
+	// Extract localID, objectType, and shardID
+	return UID{
+		localID:    uint32(uid >> 28),
+		objectType: int(uid >> 18 & 0x3FF),
+		shardID:    uint32(uid & 0x3FFFF),
+	}, nil
+}
+
 func FromBase58(s string) (UID, error) {
 	return DecomposeUID(string(base58.Decode(s)))
 }

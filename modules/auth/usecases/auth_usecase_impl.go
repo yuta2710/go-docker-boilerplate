@@ -22,7 +22,7 @@ type AuthUsecaseImpl struct {
 func (aui *AuthUsecaseImpl) Login(mod *models.LoginRequest) (*models.AuthResponse, error) {
 	u, err := aui.UserRepo.FindByEmail(mod.Email)
 
-	fmt.Println("Mod email ", mod.Email)
+	// fmt.Println("Mod email ", mod.Email)
 
 	if err != nil {
 		return nil, fmt.Errorf("[Login failed]: Email is not valid")
@@ -34,13 +34,14 @@ func (aui *AuthUsecaseImpl) Login(mod *models.LoginRequest) (*models.AuthRespons
 		return nil, fmt.Errorf("[Login failed]: Password is not correct")
 	}
 
-	fmt.Println(isValidPassword)
+	// fmt.Println(isValidPassword)
 
 	u.Mask(shared.DbTypeUser)
 
 	authId := u.FakeId.String()
 
-	fmt.Println(authId)
+	fmt.Println("Generated authId:", authId)
+	// fmt.Println(authId)
 
 	// Generate access token
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
@@ -67,8 +68,8 @@ func (aui *AuthUsecaseImpl) Login(mod *models.LoginRequest) (*models.AuthRespons
 		return nil, fmt.Errorf("Login failed, something wrong due to processing refresh token to String type")
 	}
 
-	fmt.Println("Hahahahahaha")
-	fmt.Println(accessTokenString, refreshTokenString)
+	// fmt.Println("Hahahahahaha")
+	// fmt.Println(accessTokenString, refreshTokenString)
 
 	// Save to db
 	err = aui.TokenRepo.CreateTokens(authId, accessTokenString, refreshTokenString, time.Now().Add(7*24*time.Hour))
@@ -86,7 +87,6 @@ func (aui *AuthUsecaseImpl) SignUp(mod *models.SignUpRequest) error {
 	return nil
 }
 func (aui *AuthUsecaseImpl) Profile() (*entities.FetchUserDto, error) {
-
 	return nil, nil
 }
 func (aui *AuthUsecaseImpl) SignOut() error {

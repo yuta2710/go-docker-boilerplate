@@ -67,7 +67,8 @@ func (e *echoServer) initAuthHttps(root *echo.Group) error {
 	tokenRepo := TokenRepo.NewTokenPostgresRepository(e.db)
 	usecase := usecases.NewAuthUsecaseImpl(userRepo, tokenRepo)
 	handler := handlers.NewAuthHttp(usecase)
-	AuthRouters.InitAuthRouters(handler, root)
+
+	AuthRouters.InitAuthRouters(handler, userRepo, root)
 
 	return nil
 }
