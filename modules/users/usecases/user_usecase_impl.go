@@ -3,6 +3,7 @@ package usecases
 import (
 	"fmt"
 
+	TodoEntities "github.com/yuta_2710/go-clean-arc-reviews/modules/todo/entities"
 	"github.com/yuta_2710/go-clean-arc-reviews/modules/users/entities"
 	"github.com/yuta_2710/go-clean-arc-reviews/modules/users/models"
 	"github.com/yuta_2710/go-clean-arc-reviews/modules/users/repositories"
@@ -24,6 +25,7 @@ func (uui *UserUsecaseImpl) InsertNewUser(mod *models.InsertUserRequest) (string
 		IsActive:  true,
 		IsAdmin:   false,
 		IsBlocked: false,
+		Todos:     []TodoEntities.Todo{},
 	}
 
 	authId, err := uui.userRepo.Insert(insertData)

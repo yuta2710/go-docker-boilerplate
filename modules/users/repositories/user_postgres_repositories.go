@@ -21,6 +21,7 @@ func (ur *UserPostgresRepository) Insert(dto *entities.InsertUserDto) (string, e
 		Email:     dto.Email,
 		Password:  dto.Password, // Ensure password is hashed before calling this
 		Role:      dto.Role,
+		Todos:     dto.Todos,
 	}
 
 	hash, err := shared.HashPassword(insert.Password)

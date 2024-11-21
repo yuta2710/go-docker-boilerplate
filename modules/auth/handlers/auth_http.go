@@ -17,7 +17,6 @@ type AuthHttp struct {
 }
 
 func (ahp *AuthHttp) Login(ctx echo.Context) error {
-	fmt.Println("Started trigger login")
 	// Check user exist in the repo
 	body := new(models.LoginRequest)
 

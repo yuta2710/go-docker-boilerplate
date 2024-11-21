@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/gommon/log"
 	"github.com/yuta_2710/go-clean-arc-reviews/config"
 	"github.com/yuta_2710/go-clean-arc-reviews/database"
+	CustomMiddleware "github.com/yuta_2710/go-clean-arc-reviews/middleware"
 	"github.com/yuta_2710/go-clean-arc-reviews/modules/auth/handlers"
 	AuthRouters "github.com/yuta_2710/go-clean-arc-reviews/modules/auth/routers"
 	"github.com/yuta_2710/go-clean-arc-reviews/modules/auth/usecases"
@@ -16,6 +17,11 @@ import (
 	UserRepository "github.com/yuta_2710/go-clean-arc-reviews/modules/users/repositories"
 	UserRouters "github.com/yuta_2710/go-clean-arc-reviews/modules/users/routers"
 	UserUsecase "github.com/yuta_2710/go-clean-arc-reviews/modules/users/usecases"
+
+	TodoHandler "github.com/yuta_2710/go-clean-arc-reviews/modules/todo/handlers"
+	TodoRepository "github.com/yuta_2710/go-clean-arc-reviews/modules/todo/repositories"
+	TodoRouter "github.com/yuta_2710/go-clean-arc-reviews/modules/todo/routers"
+	TodoUsecase "github.com/yuta_2710/go-clean-arc-reviews/modules/todo/usecases"
 )
 
 type echoServer struct {
@@ -48,6 +54,7 @@ func (s *echoServer) Start() {
 	// Initiliaze user https
 	s.initUserHttps(root)
 	s.initAuthHttps(root)
+	s.initTodoHttps(root)
 
 	serverUrl := fmt.Sprintf(":%d", s.conf.Server.Port)
 	s.app.Logger.Fatal(s.app.Start(serverUrl))
@@ -57,6 +64,7 @@ func (e *echoServer) initUserHttps(root *echo.Group) error {
 	repo := UserRepository.NewUserPostgresRepository(e.db)
 	usecase := UserUsecase.NewUserUsecaseImpl(repo)
 	handler := UserHandler.NewUserHttp(usecase)
+
 	UserRouters.InitUserRouters(handler, root)
 
 	return nil
@@ -68,7 +76,20 @@ func (e *echoServer) initAuthHttps(root *echo.Group) error {
 	usecase := usecases.NewAuthUsecaseImpl(userRepo, tokenRepo)
 	handler := handlers.NewAuthHttp(usecase)
 
-	AuthRouters.InitAuthRouters(handler, userRepo, root)
+	protectMdwr := CustomMiddleware.NewProtectMiddleware(userRepo)
+	AuthRouters.InitAuthRouters(handler, protectMdwr, root)
+
+	return nil
+}
+
+func (e *echoServer) initTodoHttps(root *echo.Group) error {
+	userRepo := UserRepository.NewUserPostgresRepository(e.db)
+	todoRepo := TodoRepository.NewTodoPostgresRepository(e.db)
+	usecase := TodoUsecase.NewTodoUsecaseImpl(todoRepo)
+	handler := TodoHandler.NewTodoHttp(usecase)
+
+	protectMdwr := CustomMiddleware.NewProtectMiddleware(userRepo)
+	TodoRouter.InitTodoRoutes(handler, protectMdwr, root)
 
 	return nil
 }
