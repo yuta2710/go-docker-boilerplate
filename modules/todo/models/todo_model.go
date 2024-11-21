@@ -8,12 +8,18 @@ import (
 
 type (
 	InsertTodoSample struct {
-		AuthId      int               `json:"auth_id"`
-		Title       string            `json:"title"`
-		Description string            `json:"description"`
-		IsCompleted bool              `json:"is_completed"`
-		DueDate     time.Time         `json:"due_date"`
-		Priority    entities.Priority `json:"priority"`
+		AuthId      int                   `json:"authId"`
+		Title       string                `json:"title"`
+		Description string                `json:"description"`
+		IsCompleted bool                  `json:"isCompleted"`
+		DueDate     time.Time             `json:"dueDate"`
+		Priority    entities.Priority     `json:"priority"`
+		Members     []InsertTodoMemberDto `json:"members"`
+	}
+
+	InsertTodoMemberDto struct {
+		UserId string              `json:"userId"`
+		Role   entities.MemberRole `json:"role"`
 	}
 
 	UpdateTodoSample struct {

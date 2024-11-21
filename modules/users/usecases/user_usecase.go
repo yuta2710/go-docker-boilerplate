@@ -8,4 +8,5 @@ import (
 type UserUseCase interface {
 	InsertNewUser(mod *models.InsertUserRequest) (string, error)
 	FindById(id string) (*entities.FetchUserDto, error)
+	FindAll() ([]*entities.FetchUserDto, error)
 }

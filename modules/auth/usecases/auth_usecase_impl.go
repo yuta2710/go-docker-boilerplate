@@ -60,7 +60,7 @@ func (aui *AuthUsecaseImpl) SignUp(mod *models.SignUpRequest) (*models.AuthRespo
 		LastName:  mod.LastName,
 		Email:     mod.Email,
 		Password:  mod.Password,
-		Role:      "user",
+		Role:      mod.Role,
 		IsActive:  true,
 		IsAdmin:   false,
 		IsBlocked: false,

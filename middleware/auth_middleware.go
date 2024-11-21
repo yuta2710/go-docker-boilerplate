@@ -72,6 +72,27 @@ func Protect(getUserById func(authId string) (*entities.FetchUserDto, error)) ec
 	}
 }
 
+func IsAdmin() echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			fmt.Println("[DEBUG] IsAdmin middleware triggered")
+			user, ok := c.Get("user").(*entities.FetchUserDto)
+			fmt.Println(user)
+			fmt.Printf("Role cua thang nay la %s", user.Role)
+
+			if !ok {
+				return shared.Response(c, false, http.StatusUnauthorized, "[UNAUTHORIZED]: User ID not found", nil, nil)
+			}
+
+			if user.Role != "admin" {
+				return shared.Response(c, false, http.StatusForbidden, "Forbidden: Admin role required", nil, nil)
+			}
+
+			return next(c)
+		}
+	}
+}
+
 func NewProtectMiddleware(userRepo repositories.UserRepository) echo.MiddlewareFunc {
 	return Protect(func(authId string) (*entities.FetchUserDto, error) {
 		// Decode the authId
@@ -87,6 +108,7 @@ func NewProtectMiddleware(userRepo repositories.UserRepository) echo.MiddlewareF
 		if err != nil {
 			return nil, err
 		}
+		fmt.Printf("Role cua thang nay trong protect middelware la %s", user.Role)
 
 		// Map user to FetchUserDto
 		return &entities.FetchUserDto{
@@ -94,6 +116,7 @@ func NewProtectMiddleware(userRepo repositories.UserRepository) echo.MiddlewareF
 			FirstName: user.FirstName,
 			LastName:  user.LastName,
 			Email:     user.Email,
+			Role:      user.Role,
 		}, nil
 	})
 }

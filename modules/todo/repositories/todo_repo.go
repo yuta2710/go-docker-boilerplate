@@ -13,4 +13,5 @@ type TodoRepository interface {
 	UpdateTodo(id string, sample *models.UpdateTodoSample) error
 	UpdateAvatarOfTodo(id string, sample *models.UpdateTodoAvatarSample) error
 	DeleteTodo(id string) error
+	AddUserForTodo(userId string) error
 }

@@ -36,6 +36,7 @@ func (tdHttp *TodoHttp) InsertBatch(ctx echo.Context) error {
 }
 
 func (tdHttp *TodoHttp) FindById(ctx echo.Context) error {
+
 	return nil
 }
 

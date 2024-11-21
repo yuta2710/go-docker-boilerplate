@@ -6,6 +6,17 @@ import (
 	"github.com/yuta_2710/go-clean-arc-reviews/shared"
 )
 
+type MemberRole string
+
+// Owner, Collaborators, Viewer, Assignee, Reviewers
+const (
+	owner        MemberRole = "owner"
+	collaborator MemberRole = "collaborators"
+	viewer       MemberRole = "viewer"
+	assignee     MemberRole = "assignee"
+	reviewer     MemberRole = "reviewer"
+)
+
 type Priority int
 
 const (
@@ -29,12 +40,20 @@ func (p Priority) String() string {
 
 type Todo struct {
 	shared.BaseSQLModel
-	AuthId      string    `gorm:"column:auth_id;type:VARCHAR(255);index;not null" json:"authId"`
-	Title       string    `gorm:"column:title;not null" json:"title"`
-	Description string    `gorm:"column:description" json:"description"`
-	IsCompleted bool      `gorm:"column:is_completed" json:"is_completed"`
-	DueDate     time.Time `gorm:"column:due_date" json:"due_date"`
-	Priority    Priority  `gorm:"column:priority" json:"priority"`
+	AuthId      string       `gorm:"column:auth_id;type:VARCHAR(255);index;not null" json:"authId"`
+	Title       string       `gorm:"column:title;not null" json:"title"`
+	Description string       `gorm:"column:description" json:"description"`
+	IsCompleted bool         `gorm:"column:is_completed" json:"is_completed"`
+	DueDate     time.Time    `gorm:"column:due_date" json:"due_date"`
+	Priority    Priority     `gorm:"column:priority" json:"priority"`
+	Members     []TodoMember `gorm:"many2many:todo_members;joinForeignKey:TodoId;joinReferences:AuthId" json:"members"`
+}
+
+type TodoMember struct {
+	ID     uint       `gorm:"primaryKey"`
+	TodoId string     `gorm:"column:todo_id"`
+	UserId string     `gorm:"column:user_id"`
+	Role   MemberRole `gorm:"column:role"`
 }
 
 func (td *Todo) Mask(dbType shared.DbType) {

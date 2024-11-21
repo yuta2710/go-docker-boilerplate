@@ -15,20 +15,36 @@ type TodoPostgresRepository struct {
 
 func (tdr *TodoPostgresRepository) Insert(in *entities.Todo) (string, error) {
 	// TODO: Insert do database
-	fmt.Println("\nCai lon")
-	fmt.Println(in)
-	result := tdr.db.GetDb().Create(in)
+	tx := tdr.db.GetDb().Begin()
+
+	result := tx.Create(in)
 
 	if result.Error != nil {
 		fmt.Println("Error inserting")
-		panic(result.Error.Error())
+		tx.Rollback()
+		return "", fmt.Errorf("failed to insert todo: %v", result.Error)
+	}
+
+	// Create associates members
+	if len(in.Members) > 0 {
+		for _, member := range in.Members {
+			member.TodoId = in.FakeId.String()
+			if err := tx.Create(&member).Error; err != nil {
+				tx.Rollback()
+				return "", fmt.Errorf("failed to insert todo member: %v", err)
+			}
+		}
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return "", fmt.Errorf("failed to commit transaction: %v", err)
 	}
 
 	// TODO: Mask the ID of the todo
 	fmt.Println("[INSERTED DATA SUCCESSFULLY]")
 	in.Mask(shared.DbTypeTodo)
 
-	return "", nil
+	return in.FakeId.String(), nil
 }
 
 func (tdr *TodoPostgresRepository) InsertBatch(in []*entities.Todo) error {
@@ -58,6 +74,10 @@ func (tdr *TodoPostgresRepository) UpdateAvatarOfTodo(id string, sample *models.
 }
 
 func (tdr *TodoPostgresRepository) DeleteTodo(id string) error {
+	return nil
+}
+
+func (tdr *TodoPostgresRepository) AddUserForTodo(userId string) error {
 	return nil
 }
 

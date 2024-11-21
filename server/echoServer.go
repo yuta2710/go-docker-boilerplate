@@ -64,8 +64,9 @@ func (e *echoServer) initUserHttps(root *echo.Group) error {
 	repo := UserRepository.NewUserPostgresRepository(e.db)
 	usecase := UserUsecase.NewUserUsecaseImpl(repo)
 	handler := UserHandler.NewUserHttp(usecase)
+	protectMdwr := CustomMiddleware.NewProtectMiddleware(repo)
 
-	UserRouters.InitUserRouters(handler, root)
+	UserRouters.InitUserRouters(handler, protectMdwr, root)
 
 	return nil
 }

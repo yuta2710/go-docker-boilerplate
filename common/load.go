@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/yuta_2710/go-clean-arc-reviews/database"
 	TodoSchema "github.com/yuta_2710/go-clean-arc-reviews/modules/todo/entities"
@@ -11,15 +12,7 @@ import (
 
 func LoadRelations(repo database.Database) {
 	fmt.Println("Load called")
-	if !repo.GetDb().Migrator().HasTable("users") {
-		repo.GetDb().Migrator().CreateTable(&UserSchema.User{})
-	}
-
-	if !repo.GetDb().Migrator().HasTable("token_providers") {
-		repo.GetDb().Migrator().CreateTable(&TokenProviderSchema.TokenProvider{})
-	}
-
-	if !repo.GetDb().Migrator().HasTable("todos") {
-		repo.GetDb().Migrator().CreateTable(&TodoSchema.Todo{})
+	if err := repo.GetDb().AutoMigrate(&UserSchema.User{}, &TokenProviderSchema.TokenProvider{}, &TodoSchema.Todo{}, &TodoSchema.TodoMember{}); err != nil {
+		log.Fatalf("Failed to migrate database: %v", err)
 	}
 }

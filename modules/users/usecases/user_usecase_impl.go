@@ -3,7 +3,7 @@ package usecases
 import (
 	"fmt"
 
-	TodoEntities "github.com/yuta_2710/go-clean-arc-reviews/modules/todo/entities"
+	// TodoEntities "github.com/yuta_2710/go-clean-arc-reviews/modules/todo/entities"
 	"github.com/yuta_2710/go-clean-arc-reviews/modules/users/entities"
 	"github.com/yuta_2710/go-clean-arc-reviews/modules/users/models"
 	"github.com/yuta_2710/go-clean-arc-reviews/modules/users/repositories"
@@ -16,19 +16,8 @@ type UserUsecaseImpl struct {
 }
 
 func (uui *UserUsecaseImpl) InsertNewUser(mod *models.InsertUserRequest) (string, error) {
-	insertData := &entities.InsertUserDto{
-		FirstName: mod.FirstName,
-		LastName:  mod.LastName,
-		Email:     mod.Email,
-		Password:  mod.Password,
-		Role:      "user",
-		IsActive:  true,
-		IsAdmin:   false,
-		IsBlocked: false,
-		Todos:     []TodoEntities.Todo{},
-	}
-
-	authId, err := uui.userRepo.Insert(insertData)
+	insertDto := entities.NewInsertUserRequest(mod.FirstName, mod.LastName, mod.Email, mod.Password, mod.Role)
+	authId, err := uui.userRepo.Insert(insertDto)
 
 	if err != nil {
 		return "", err
@@ -74,6 +63,21 @@ func (uui *UserUsecaseImpl) FindByEmail(email string) (*entities.FetchUserDto, e
 	// Check err is not nil
 	// Mask the ID
 	return userDto, nil
+}
+
+func (uui *UserUsecaseImpl) FindAll() ([]*entities.FetchUserDto, error) {
+	result, err := uui.userRepo.FindAll()
+	users := make([]*entities.FetchUserDto, len(result))
+
+	if err != nil {
+		panic("\nUsers empty or not found")
+	}
+
+	for i, _ := range users {
+		users[i] = PreprocessUserDto(result[i])
+	}
+
+	return users, nil
 }
 
 func PreprocessUserDto(ent *entities.User) *entities.FetchUserDto {

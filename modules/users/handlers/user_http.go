@@ -19,6 +19,8 @@ func (u *UserHttp) CreateNewUser(ctx echo.Context) error {
 	// Extract body
 	body := new(models.InsertUserRequest)
 
+	fmt.Println()
+
 	// Check error of binding body
 	if err := ctx.Bind(body); err != nil {
 		return err
@@ -44,6 +46,16 @@ func (u *UserHttp) GetUserById(ctx echo.Context) error {
 	}
 
 	return shared.Response(ctx, true, http.StatusOK, "Successfully fetched", user, nil)
+}
+
+func (u *UserHttp) GetUsers(ctx echo.Context) error {
+	users, err := u.UserUsecase.FindAll()
+
+	if err != nil {
+		return shared.Response(ctx, false, http.StatusNotFound, "Users not found or empty", nil, nil)
+	}
+
+	return shared.Response(ctx, true, http.StatusOK, "Successfully fetched", users, nil)
 }
 
 func NewUserHttp(uc usecases.UserUseCase) UserHandler {

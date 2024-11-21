@@ -5,6 +5,7 @@ import "github.com/yuta_2710/go-clean-arc-reviews/modules/users/entities"
 type UserRepository interface {
 	Insert(in *entities.InsertUserDto) (string, error)
 	InsertBatch(in []*entities.InsertUserDto) error
+	FindAll() ([]*entities.User, error)
 	FindById(id string) (*entities.User, error)
 	FindByEmail(email string) (*entities.User, error)
 }

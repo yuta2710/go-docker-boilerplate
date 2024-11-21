@@ -75,6 +75,16 @@ func (ur *UserPostgresRepository) FindByEmail(email string) (*entities.User, err
 	return u, nil
 }
 
+func (ur *UserPostgresRepository) FindAll() ([]*entities.User, error) {
+	var users []*entities.User
+	result := ur.db.GetDb().Find(&users)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return users, nil
+}
+
 func NewUserPostgresRepository(db database.Database) UserRepository {
 	return &UserPostgresRepository{
 		db: db,
