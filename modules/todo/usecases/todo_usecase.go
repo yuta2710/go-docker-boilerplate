@@ -8,7 +8,7 @@ import (
 )
 
 type TodoUsecase interface {
-	Insert(ctx context.Context, in *models.InsertTodoSample) (string, error)
+	Insert(ctx context.Context, in *models.InsertTodoSample) (int, error)
 	InsertBatch(ctx context.Context, in []*models.InsertTodoSample) error
 	FindById(ctx context.Context, id string) (*entities.Todo, error)
 	FindAllByUserId(ctx context.Context, userId string) ([]*entities.Todo, error)

@@ -50,8 +50,7 @@ type (
 		IsAdmin   bool                `gorm:"column:is_admin" json:"isAdmin"`
 		IsBlocked bool                `gorm:"column:is_blocked" json:"isBlocked"`
 		IsDeleted bool                `gorm:"column:is_deleted" json:"isDeleted"`
-		Todos     []TodoEntities.Todo `gorm:"many2many:todo_members;joinForeignKey:AuthId;joinReferences:TodoId" json:"todos"`
-		// Todos     []entities.Todo `gorm:"foreignKey:AuthId;constraint:OnDelete:CASCADE;" json:"todos"`
+		Todos     []TodoEntities.Todo `gorm:"many2many:todo_members;joinForeignKey:UserId;joinReferences:TodoId" json:"todos"`
 	}
 
 	InsertUserDto struct {
@@ -64,7 +63,7 @@ type (
 		IsAdmin   bool                `json:"isAdmin"`
 		IsBlocked bool                `json:"isBlocked"`
 		IsDeleted bool                `gorm:"column:is_deleted" json:"isDeleted"`
-		Todos     []TodoEntities.Todo `gorm:"foreignKey:AuthId;constraint:OnDelete:CASCADE;" json:"todos"`
+		Todos     []TodoEntities.Todo `gorm:"foreignKey:UserId;constraint:OnDelete:CASCADE;" json:"todos"`
 	}
 
 	FetchUserDto struct {

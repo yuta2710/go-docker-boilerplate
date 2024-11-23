@@ -6,45 +6,95 @@ import (
 	"github.com/yuta_2710/go-clean-arc-reviews/database"
 	"github.com/yuta_2710/go-clean-arc-reviews/modules/todo/entities"
 	"github.com/yuta_2710/go-clean-arc-reviews/modules/todo/models"
-	"github.com/yuta_2710/go-clean-arc-reviews/shared"
 )
 
 type TodoPostgresRepository struct {
 	db database.Database
 }
 
-func (tdr *TodoPostgresRepository) Insert(in *entities.Todo) (string, error) {
-	// TODO: Insert do database
+// func (tdr *TodoPostgresRepository) Insert(in *entities.Todo) (int, error) {
+// 	// Transaction đầu tiên: Lưu vào bảng todos
+// 	txTodo := tdr.db.GetDb().Begin()
+
+// 	// Thêm bản ghi vào todos
+// 	if err := txTodo.Create(in).Error; err != nil {
+// 		txTodo.Rollback()
+// 		return 0, fmt.Errorf("failed to insert todo: %v", err)
+// 	}
+
+// 	// Lấy ID của bản ghi todo vừa được tạo
+// 	if in.Id == 0 {
+// 		txTodo.Rollback()
+// 		return 0, fmt.Errorf("failed to fetch inserted todo ID")
+// 	}
+
+// 	// Commit transaction đầu tiên
+// 	if err := txTodo.Commit().Error; err != nil {
+// 		return 0, fmt.Errorf("failed to commit todo transaction: %v", err)
+// 	}
+
+// 	// Transaction thứ hai: Lưu vào bảng todo_members
+// 	if len(in.Members) > 0 {
+// 		txMembers := tdr.db.GetDb().Begin()
+
+// 		for _, member := range in.Members {
+// 			member.TodoId = in.Id
+// 			if err := txMembers.Create(&member).Error; err != nil {
+// 				txMembers.Rollback()
+// 				return 0, fmt.Errorf("failed to insert todo member: %v", err)
+// 			}
+// 		}
+
+// 		// Commit transaction thứ hai
+// 		if err := txMembers.Commit().Error; err != nil {
+// 			return 0, fmt.Errorf("failed to commit todo members transaction: %v", err)
+// 		}
+// 	}
+
+// 	fmt.Println("[INSERTED DATA SUCCESSFULLY]")
+// 	return in.Id, nil
+// }
+
+func (tdr *TodoPostgresRepository) InsertTodo(in *entities.Todo) (int, error) {
 	tx := tdr.db.GetDb().Begin()
 
-	result := tx.Create(in)
+	fmt.Println(in)
 
-	if result.Error != nil {
-		fmt.Println("Error inserting")
+	// Lưu todo
+	if err := tx.Create(in).Error; err != nil {
+		fmt.Println("Yoooo bro oi")
 		tx.Rollback()
-		return "", fmt.Errorf("failed to insert todo: %v", result.Error)
+		return 0, fmt.Errorf("failed to insert todo: %v", err)
 	}
 
-	// Create associates members
-	if len(in.Members) > 0 {
-		for _, member := range in.Members {
-			member.TodoId = in.FakeId.String()
-			if err := tx.Create(&member).Error; err != nil {
-				tx.Rollback()
-				return "", fmt.Errorf("failed to insert todo member: %v", err)
-			}
+	// Commit transaction
+	if err := tx.Commit().Error; err != nil {
+		return 0, fmt.Errorf("failed to commit todo transaction: %v", err)
+	}
+
+	fmt.Println("[TODO INSERTED SUCCESSFULLY]")
+	return in.Id, nil
+}
+
+func (tdr *TodoPostgresRepository) InsertTodoMembers(todoId int, members []entities.TodoMember) error {
+	tx := tdr.db.GetDb().Begin()
+
+	// Lưu từng member vào todo_members
+	for _, member := range members {
+		member.TodoId = todoId
+		if err := tx.Create(&member).Error; err != nil {
+			tx.Rollback()
+			return fmt.Errorf("failed to insert todo member: %v", err)
 		}
 	}
 
+	// Commit transaction
 	if err := tx.Commit().Error; err != nil {
-		return "", fmt.Errorf("failed to commit transaction: %v", err)
+		return fmt.Errorf("failed to commit todo members transaction: %v", err)
 	}
 
-	// TODO: Mask the ID of the todo
-	fmt.Println("[INSERTED DATA SUCCESSFULLY]")
-	in.Mask(shared.DbTypeTodo)
-
-	return in.FakeId.String(), nil
+	fmt.Println("[TODO MEMBERS INSERTED SUCCESSFULLY]")
+	return nil
 }
 
 func (tdr *TodoPostgresRepository) InsertBatch(in []*entities.Todo) error {
@@ -57,7 +107,7 @@ func (tdr *TodoPostgresRepository) FindById(id string) (*entities.Todo, error) {
 
 func (tdr *TodoPostgresRepository) FindAllByUserId(userId string) ([]*entities.Todo, error) {
 	var todos []*entities.Todo
-	result := tdr.db.GetDb().Where("auth_id = ?", userId).Find(&todos)
+	result := tdr.db.GetDb().Where("user_id = ?", userId).Find(&todos)
 
 	if result.Error != nil {
 		return nil, result.Error
@@ -84,5 +134,18 @@ func (tdr *TodoPostgresRepository) AddUserForTodo(userId string) error {
 func NewTodoPostgresRepository(db database.Database) TodoRepository {
 	return &TodoPostgresRepository{
 		db: db,
+	}
+}
+
+func convertPriorityToEnum(priority entities.Priority) string {
+	switch priority {
+	case entities.Low:
+		return "Low"
+	case entities.Medium:
+		return "Medium"
+	case entities.High:
+		return "High"
+	default:
+		return "Unknown" // Or handle invalid case appropriately
 	}
 }

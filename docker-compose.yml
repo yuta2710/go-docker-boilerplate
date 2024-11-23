@@ -18,7 +18,7 @@ services:
     environment:
       POSTGRES_PASSWORD: 123456
       POSTGRES_USER: postgres
-      POSTGRES_DB: cockroachdb
+      POSTGRES_DB: gocleandb
 
     # we mount a data volume to make sure we don't lose data
     volumes:

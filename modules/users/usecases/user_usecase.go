@@ -6,7 +6,7 @@ import (
 )
 
 type UserUseCase interface {
-	InsertNewUser(mod *models.InsertUserRequest) (string, error)
-	FindById(id string) (*entities.FetchUserDto, error)
+	InsertNewUser(mod *models.InsertUserRequest) (int, string, error)
+	FindById(id int) (*entities.FetchUserDto, error)
 	FindAll() ([]*entities.FetchUserDto, error)
 }

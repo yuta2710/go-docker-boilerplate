@@ -17,6 +17,7 @@ import (
 	UserRepository "github.com/yuta_2710/go-clean-arc-reviews/modules/users/repositories"
 	UserRouters "github.com/yuta_2710/go-clean-arc-reviews/modules/users/routers"
 	UserUsecase "github.com/yuta_2710/go-clean-arc-reviews/modules/users/usecases"
+	"github.com/yuta_2710/go-clean-arc-reviews/shared"
 
 	TodoHandler "github.com/yuta_2710/go-clean-arc-reviews/modules/todo/handlers"
 	TodoRepository "github.com/yuta_2710/go-clean-arc-reviews/modules/todo/repositories"
@@ -86,6 +87,12 @@ func (e *echoServer) initAuthHttps(root *echo.Group) error {
 func (e *echoServer) initTodoHttps(root *echo.Group) error {
 	userRepo := UserRepository.NewUserPostgresRepository(e.db)
 	todoRepo := TodoRepository.NewTodoPostgresRepository(e.db)
+
+	authIdProvider := &shared.Base64AuthIdProvider{}
+	if authIdProvider == nil {
+		log.Fatal("AuthIdProvider is nil")
+	}
+
 	usecase := TodoUsecase.NewTodoUsecaseImpl(todoRepo)
 	handler := TodoHandler.NewTodoHttp(usecase)
 

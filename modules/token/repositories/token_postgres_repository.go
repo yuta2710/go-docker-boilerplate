@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/yuta_2710/go-clean-arc-reviews/database"
@@ -11,9 +12,9 @@ type TokenPostgresRepository struct {
 	db database.Database
 }
 
-func (tpr *TokenPostgresRepository) CreateTokens(authId string, accessToken string, refreshToken string, expiredAt time.Time) error {
+func (tpr *TokenPostgresRepository) CreateTokens(userId int, accessToken string, refreshToken string, expiredAt time.Time) error {
 	tokenProvider := entities.TokenProvider{
-		AuthId:       authId,
+		UserId:       userId,
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		ExpiredAt:    expiredAt,
@@ -21,8 +22,13 @@ func (tpr *TokenPostgresRepository) CreateTokens(authId string, accessToken stri
 
 	result := tpr.db.GetDb().Create(&tokenProvider)
 
+	if result.Error != nil {
+		fmt.Printf("Error inserting token provider: %v\n", result.Error)
+	}
+
 	return result.Error
 }
+
 func (tpr *TokenPostgresRepository) ValidateRefreshToken(refreshToken string) error {
 	return nil
 }

@@ -6,7 +6,10 @@ import (
 )
 
 type TodoRepository interface {
-	Insert(in *entities.Todo) (string, error)
+	// Insert(in *entities.Todo) (int, error)
+	InsertTodo(in *entities.Todo) (int, error)
+	InsertTodoMembers(todoId int, members []entities.TodoMember) error
+
 	InsertBatch(in []*entities.Todo) error
 	FindById(id string) (*entities.Todo, error)
 	FindAllByUserId(userId string) ([]*entities.Todo, error)

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -15,6 +16,8 @@ type TodoHttp struct {
 
 func (tdHttp *TodoHttp) CreateNewTodo(ctx echo.Context) error {
 	body := new(models.InsertTodoSample)
+
+	fmt.Println("Clm no")
 
 	if err := ctx.Bind(body); err != nil {
 		return err

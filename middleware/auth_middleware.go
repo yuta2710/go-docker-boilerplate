@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/golang-jwt/jwt"
@@ -55,6 +56,8 @@ func Protect(getUserById func(authId string) (*entities.FetchUserDto, error)) ec
 				return shared.Response(c, false, http.StatusUnauthorized, "User ID not found in token", nil, nil)
 			}
 
+			fmt.Printf("Auth id %s", authId)
+
 			// Use the provided function to fetch the user
 			user, err := getUserById(authId)
 			if err != nil {
@@ -102,13 +105,15 @@ func NewProtectMiddleware(userRepo repositories.UserRepository) echo.MiddlewareF
 		}
 
 		idStr := fmt.Sprintf("%d", decodedUID.GetLocalID())
-
+		id, _ := strconv.Atoi(idStr)
 		// Find user by ID
-		user, err := userRepo.FindById(idStr)
+		user, err := userRepo.FindById(id)
 		if err != nil {
 			return nil, err
 		}
 		fmt.Printf("Role cua thang nay trong protect middelware la %s", user.Role)
+
+		fmt.Println("Hahaha")
 
 		// Map user to FetchUserDto
 		return &entities.FetchUserDto{

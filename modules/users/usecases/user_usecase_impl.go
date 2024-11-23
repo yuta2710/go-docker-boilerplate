@@ -15,20 +15,20 @@ type UserUsecaseImpl struct {
 	userRepo UserRepo.UserRepository
 }
 
-func (uui *UserUsecaseImpl) InsertNewUser(mod *models.InsertUserRequest) (string, error) {
+func (uui *UserUsecaseImpl) InsertNewUser(mod *models.InsertUserRequest) (int, string, error) {
 	insertDto := entities.NewInsertUserRequest(mod.FirstName, mod.LastName, mod.Email, mod.Password, mod.Role)
-	authId, err := uui.userRepo.Insert(insertDto)
+	userId, fakeId, err := uui.userRepo.Insert(insertDto)
 
 	if err != nil {
-		return "", err
+		return 0, "", err
 	}
 
 	fmt.Println("[CREATE ACCOUNT FROM USECASE LAYER SUCCESSFULLY]")
 
-	return authId, nil
+	return userId, fakeId, nil
 }
 
-func (uui *UserUsecaseImpl) FindById(id string) (*entities.FetchUserDto, error) {
+func (uui *UserUsecaseImpl) FindById(id int) (*entities.FetchUserDto, error) {
 	// Get user from repo
 	user, err := uui.userRepo.FindById(id)
 

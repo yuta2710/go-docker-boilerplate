@@ -8,17 +8,18 @@ import (
 
 type (
 	InsertTodoSample struct {
-		AuthId      int                   `json:"authId"`
+		AuthId      string                `json:"authId"`
 		Title       string                `json:"title"`
 		Description string                `json:"description"`
 		IsCompleted bool                  `json:"isCompleted"`
 		DueDate     time.Time             `json:"dueDate"`
 		Priority    entities.Priority     `json:"priority"`
-		Members     []InsertTodoMemberDto `json:"members"`
+		Members     []entities.TodoMember `json:"members"`
 	}
 
 	InsertTodoMemberDto struct {
-		UserId string              `json:"userId"`
+		UserId int                 `json:"userId"`
+		TodoId int                 `json:"todoId"`
 		Role   entities.MemberRole `json:"role"`
 	}
 

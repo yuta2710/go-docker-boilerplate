@@ -41,8 +41,9 @@ func MapHeaders(ctx echo.Context, headers map[string]string) error {
 	return nil
 }
 
-func TokenProvider(authId string) (string, string, error) {
+func TokenProvider(userId int, authId string) (string, string, error) {
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"userId": userId,
 		"authId": authId,
 		"exp":    time.Now().Add(15 * time.Minute).Unix(),
 	})
@@ -56,6 +57,7 @@ func TokenProvider(authId string) (string, string, error) {
 
 	// Generate refresh token
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"userId": userId,
 		"authId": authId,
 		"exp":    time.Now().Add(7 * 24 * time.Hour).Unix(),
 	})

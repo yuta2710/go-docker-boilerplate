@@ -22,8 +22,6 @@ type AuthUsecaseImpl struct {
 func (aui *AuthUsecaseImpl) Login(mod *models.LoginRequest) (*models.AuthResponse, error) {
 	u, err := aui.UserRepo.FindByEmail(mod.Email)
 
-	// fmt.Println("Mod email ", mod.Email)
-
 	if err != nil {
 		return nil, fmt.Errorf("[Login failed]: Email is not valid")
 	}
@@ -36,14 +34,14 @@ func (aui *AuthUsecaseImpl) Login(mod *models.LoginRequest) (*models.AuthRespons
 
 	u.Mask(shared.DbTypeUser)
 	authId := u.FakeId.String()
-	accessTokenString, refreshTokenString, err := shared.TokenProvider(authId)
+	accessTokenString, refreshTokenString, err := shared.TokenProvider(u.Id, authId)
 
 	if err != nil {
 		return nil, fmt.Errorf("Login failed, something wrong due to processing refresh token to String type")
 	}
 
 	// Save to db
-	err = aui.TokenRepo.CreateTokens(authId, accessTokenString, refreshTokenString, time.Now().Add(7*24*time.Hour))
+	err = aui.TokenRepo.CreateTokens(u.Id, accessTokenString, refreshTokenString, time.Now().Add(7*24*time.Hour))
 
 	if err != nil {
 		return nil, fmt.Errorf("Login failed, something wrong due to saving token to database")
@@ -67,12 +65,13 @@ func (aui *AuthUsecaseImpl) SignUp(mod *models.SignUpRequest) (*models.AuthRespo
 		Todos:     []TodoEntities.Todo{},
 	}
 
-	authId, err := aui.UserRepo.Insert(insertData)
+	userId, fakeId, err := aui.UserRepo.Insert(insertData)
+
 	if err != nil {
 		return nil, err
 	}
 
-	accessTokenString, refreshTokenString, err := shared.TokenProvider(authId)
+	accessTokenString, refreshTokenString, err := shared.TokenProvider(userId, fakeId)
 
 	if err != nil {
 		return nil, fmt.Errorf("Login failed, something wrong due to processing refresh token to String type")
@@ -81,7 +80,7 @@ func (aui *AuthUsecaseImpl) SignUp(mod *models.SignUpRequest) (*models.AuthRespo
 	// fmt.Println(accessTokenString, refreshTokenString)
 
 	// Save to db
-	err = aui.TokenRepo.CreateTokens(authId, accessTokenString, refreshTokenString, time.Now().Add(7*24*time.Hour))
+	err = aui.TokenRepo.CreateTokens(userId, accessTokenString, refreshTokenString, time.Now().Add(7*24*time.Hour))
 
 	if err != nil {
 		return nil, fmt.Errorf("Login failed, something wrong due to saving token to database")
@@ -92,6 +91,7 @@ func (aui *AuthUsecaseImpl) SignUp(mod *models.SignUpRequest) (*models.AuthRespo
 		RefreshToken: refreshTokenString,
 	}, nil
 }
+
 func (aui *AuthUsecaseImpl) Profile() (*entities.FetchUserDto, error) {
 	return nil, nil
 }

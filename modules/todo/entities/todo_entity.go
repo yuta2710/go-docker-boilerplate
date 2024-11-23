@@ -1,6 +1,8 @@
 package entities
 
 import (
+	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/yuta_2710/go-clean-arc-reviews/shared"
@@ -10,19 +12,20 @@ type MemberRole string
 
 // Owner, Collaborators, Viewer, Assignee, Reviewers
 const (
-	owner        MemberRole = "owner"
-	collaborator MemberRole = "collaborators"
-	viewer       MemberRole = "viewer"
-	assignee     MemberRole = "assignee"
-	reviewer     MemberRole = "reviewer"
+	Owner        MemberRole = "Owner"
+	Collaborator MemberRole = "Collaborator"
+	Viewer       MemberRole = "Viewer"
+	Assignee     MemberRole = "Assignee"
+	Reviewer     MemberRole = "Reviewer"
+	Member       MemberRole = "Member"
 )
 
-type Priority int
+type Priority string
 
 const (
-	Low Priority = iota + 1
-	Medium
-	High
+	Low    Priority = "Low"
+	Medium Priority = "Medium"
+	High   Priority = "High"
 )
 
 func (p Priority) String() string {
@@ -38,21 +41,73 @@ func (p Priority) String() string {
 	}
 }
 
+// func (p Priority) Value() (driver.Value, error) {
+// 	return int(p), nil
+// }
+
+func (p *Priority) Scan(value interface{}) error {
+	v, ok := value.(int64)
+
+	if !ok {
+		return fmt.Errorf("failed to scan Priority: %v", value)
+	}
+	*p = Priority(v)
+
+	return nil
+}
+
+func (p *Priority) UnmarshalJSON(data []byte) error {
+	var priorityStr string
+	// Unmarshal the data into a string
+	if err := json.Unmarshal(data, &priorityStr); err != nil {
+		return fmt.Errorf("priority should be a string, got %s", data)
+	}
+
+	// Convert string to Priority
+	switch priorityStr {
+	case "Low":
+		*p = Low
+	case "Medium":
+		*p = Medium
+	case "High":
+		*p = High
+	default:
+		return fmt.Errorf("invalid priority value: %s", priorityStr)
+	}
+
+	return nil
+}
+
+func ConvertPriorityToEnum(priority Priority) string {
+	switch priority {
+	case Low:
+		return "Low"
+	case Medium:
+		return "Medium"
+	case High:
+		return "High"
+	default:
+		return "" // Or handle invalid case appropriately
+	}
+}
+
 type Todo struct {
 	shared.BaseSQLModel
-	AuthId      string       `gorm:"column:auth_id;type:VARCHAR(255);index;not null" json:"authId"`
-	Title       string       `gorm:"column:title;not null" json:"title"`
-	Description string       `gorm:"column:description" json:"description"`
-	IsCompleted bool         `gorm:"column:is_completed" json:"is_completed"`
-	DueDate     time.Time    `gorm:"column:due_date" json:"due_date"`
-	Priority    Priority     `gorm:"column:priority" json:"priority"`
-	Members     []TodoMember `gorm:"many2many:todo_members;joinForeignKey:TodoId;joinReferences:AuthId" json:"members"`
+	UserId      int          `gorm:"column:user_id;not null" json:"userId"`                                             // Matches the user_id foreign key in the database
+	Title       string       `gorm:"column:title;type:VARCHAR(255);not null" json:"title"`                              // Matches the title column in the database
+	Description string       `gorm:"column:description;type:TEXT" json:"description"`                                   // Matches the description column in the database
+	IsCompleted bool         `gorm:"column:is_completed;type:BOOLEAN;default:false" json:"isCompleted"`                 // Matches the is_completed column in the database
+	DueDate     time.Time    `gorm:"column:due_date;type:TIMESTAMP" json:"dueDate"`                                     // Matches the due_date column in the database
+	Priority    Priority     `gorm:"column:priority;type:priority;not null" json:"priority"`                            // Matches the priority column as ENUM
+	CreatedAt   time.Time    `gorm:"column:created_at;default:CURRENT_TIMESTAMP" json:"createdAt"`                      // Tracks the creation time
+	UpdatedAt   time.Time    `gorm:"column:updated_at;default:CURRENT_TIMESTAMP" json:"updatedAt"`                      // Tracks the update time
+	Members     []TodoMember `gorm:"many2many:todo_members;joinForeignKey:TodoId;joinReferences:UserId" json:"members"` // For TodoMember association
 }
 
 type TodoMember struct {
-	ID     uint       `gorm:"primaryKey"`
-	TodoId string     `gorm:"column:todo_id"`
-	UserId string     `gorm:"column:user_id"`
+	// ID     uint       `gorm:"primaryKey"`
+	TodoId int        `gorm:"column:todo_id;not null"`
+	UserId int        `gorm:"column:user_id; not null"`
 	Role   MemberRole `gorm:"column:role"`
 }
 
