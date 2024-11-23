@@ -52,8 +52,8 @@ func (tduc *TodoUsecaseImpl) Insert(ctx context.Context, in *models.InsertTodoSa
 
 	newTodoId, err := tduc.Repo.InsertTodo(toEntity)
 
-	if err != nil {
-		panic("Cannot insert todo")
+	if err != nil || newTodoId == 0 {
+		return 0, fmt.Errorf("[DB Layer]: failed to insert todo members: %v", err)
 	}
 
 	members := []entities.TodoMember{}
@@ -89,9 +89,13 @@ func (tduc *TodoUsecaseImpl) FindById(ctx context.Context, id string) (*entities
 	return nil, nil
 }
 
-func (tduc *TodoUsecaseImpl) FindAllByUserId(ctx context.Context, userId string) ([]*entities.Todo, error) {
-	todos, err := tduc.Repo.FindAllByUserId(userId)
+func (tduc *TodoUsecaseImpl) FindAllByUserId(ctx context.Context, fakeId string) ([]*entities.Todo, error) {
+	componentId, _ := shared.DecomposeUidV2(fakeId)
+	localId := componentId.GetLocalID()
 
+	fmt.Printf("Decoded ID: %d", componentId.GetLocalID())
+
+	todos, err := tduc.Repo.FindAllByUserId(int(localId))
 	if err != nil {
 		return nil, err
 	}

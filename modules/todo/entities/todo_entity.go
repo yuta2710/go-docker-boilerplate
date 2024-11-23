@@ -41,17 +41,25 @@ func (p Priority) String() string {
 	}
 }
 
-// func (p Priority) Value() (driver.Value, error) {
-// 	return int(p), nil
-// }
-
+//	func (p Priority) Value() (driver.Value, error) {
+//		return int(p), nil
+//	}
 func (p *Priority) Scan(value interface{}) error {
-	v, ok := value.(int64)
-
+	strValue, ok := value.(string)
 	if !ok {
-		return fmt.Errorf("failed to scan Priority: %v", value)
+		return fmt.Errorf("failed to scan Priority: %v is not a string", value)
 	}
-	*p = Priority(v)
+
+	switch strValue {
+	case "Low":
+		*p = Low
+	case "Medium":
+		*p = Medium
+	case "High":
+		*p = High
+	default:
+		return fmt.Errorf("invalid priority value: %v", strValue)
+	}
 
 	return nil
 }

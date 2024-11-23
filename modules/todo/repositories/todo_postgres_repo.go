@@ -105,9 +105,13 @@ func (tdr *TodoPostgresRepository) FindById(id string) (*entities.Todo, error) {
 	return nil, nil
 }
 
-func (tdr *TodoPostgresRepository) FindAllByUserId(userId string) ([]*entities.Todo, error) {
+func (tdr *TodoPostgresRepository) FindAllByUserId(userId int) ([]*entities.Todo, error) {
 	var todos []*entities.Todo
+	fmt.Printf("User ID: %d", userId)
+
 	result := tdr.db.GetDb().Where("user_id = ?", userId).Find(&todos)
+
+	fmt.Println(result)
 
 	if result.Error != nil {
 		return nil, result.Error
