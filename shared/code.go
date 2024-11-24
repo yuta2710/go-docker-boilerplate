@@ -16,33 +16,33 @@ type AuthIdProvider interface {
 type Base64AuthIdProvider struct {
 }
 
-func (p *Base64AuthIdProvider) Encode(userId int) string {
-	return base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("user-%d", userId)))
+func (p *Base64AuthIdProvider) Encode(id int, field string) string {
+	return base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s-%d", field, id)))
 }
 
-func (p *Base64AuthIdProvider) Decode(authId string) (int, error) {
-	fmt.Printf("Decoding authId: %s\n", authId)
+func (p *Base64AuthIdProvider) Decode(encodedId string, field string) (int, error) {
+	fmt.Printf("\nStarting to decoding the ID: %s\n", encodedId)
 
 	// Step 1: Base64 decode
-	decoded, err := base64.StdEncoding.DecodeString(authId)
+	decoded, err := base64.StdEncoding.DecodeString(encodedId)
 	if err != nil {
-		return 0, fmt.Errorf("failed to decode authId: %v", err)
+		return 0, fmt.Errorf("failed to decode id: %v", err)
 	}
-	fmt.Printf("Decoded string: %s\n", string(decoded))
+	fmt.Printf("Decoded string result then: %s\n", string(decoded))
 
 	// Step 2: Split the string into parts
 	parts := strings.Split(string(decoded), "-")
-	if len(parts) != 2 || parts[0] != "user" {
+	if len(parts) != 2 || parts[0] != field {
 		return 0, fmt.Errorf("invalid authId format: %s", string(decoded))
 	}
 	fmt.Printf("Parts after split: %v\n", parts)
 
 	// Step 3: Convert the ID part to an integer
-	userId, err := strconv.Atoi(parts[1])
+	decodedId, err := strconv.Atoi(parts[1])
 	if err != nil {
-		return 0, fmt.Errorf("failed to parse userId from authId: %v", err)
+		return 0, fmt.Errorf("failed to parse id from encoded ID: %v", err)
 	}
-	fmt.Printf("Parsed userId: %d\n", userId)
+	fmt.Printf("Parsed id: %d\n", decodedId)
 
-	return userId, nil
+	return decodedId, nil
 }

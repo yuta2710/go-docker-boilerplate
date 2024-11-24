@@ -10,5 +10,6 @@ func InitTodoRoutes(http handlers.TodoHandler, mdwr echo.MiddlewareFunc, routes 
 	protected.Use(mdwr)
 
 	protected.GET("/:authId", http.FindAllByUserId)
+	protected.GET("/:id", http.FindById)
 	protected.POST("/", http.CreateNewTodo)
 }

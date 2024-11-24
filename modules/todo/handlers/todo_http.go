@@ -39,8 +39,17 @@ func (tdHttp *TodoHttp) InsertBatch(ctx echo.Context) error {
 }
 
 func (tdHttp *TodoHttp) FindById(ctx echo.Context) error {
+	id := ctx.Param("id")
 
-	return nil
+	fmt.Println(id)
+	stdCtx := ctx.Request().Context()
+
+	todo, err := tdHttp.Uc.FindById(stdCtx, id)
+
+	if err != nil {
+		return shared.Response(ctx, false, http.StatusBadRequest, "Todo not found", nil, nil)
+	}
+	return shared.Response(ctx, true, http.StatusOK, "Get todo successfully", todo, nil)
 }
 
 func (tdHttp *TodoHttp) FindAllByUserId(ctx echo.Context) error {

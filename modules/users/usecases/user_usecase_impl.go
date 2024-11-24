@@ -87,6 +87,7 @@ func PreprocessUserDto(ent *entities.User) *entities.FetchUserDto {
 		FirstName: ent.FirstName,
 		LastName:  ent.LastName,
 		Email:     ent.Email,
+		Role:      ent.Role,
 	}
 }
 

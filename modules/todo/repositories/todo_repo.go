@@ -11,9 +11,11 @@ type TodoRepository interface {
 	InsertTodoMembers(todoId int, members []entities.TodoMember) error
 
 	InsertBatch(in []*entities.Todo) error
-	FindById(id string) (*entities.Todo, error)
+	FindById(id int) (*entities.Todo, error)
 	FindAllByUserId(userId int) ([]*entities.Todo, error)
-	UpdateTodo(id string, sample *models.UpdateTodoSample) error
+
+	UpdateTodo(id int, sample *models.UpdateTodoSample) error
+
 	UpdateAvatarOfTodo(id string, sample *models.UpdateTodoAvatarSample) error
 	DeleteTodo(id string) error
 	AddUserForTodo(userId string) error

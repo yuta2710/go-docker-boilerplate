@@ -101,20 +101,22 @@ func ConvertPriorityToEnum(priority Priority) string {
 
 type Todo struct {
 	shared.BaseSQLModel
-	UserId      int          `gorm:"column:user_id;not null" json:"userId"`                                             // Matches the user_id foreign key in the database
-	Title       string       `gorm:"column:title;type:VARCHAR(255);not null" json:"title"`                              // Matches the title column in the database
-	Description string       `gorm:"column:description;type:TEXT" json:"description"`                                   // Matches the description column in the database
-	IsCompleted bool         `gorm:"column:is_completed;type:BOOLEAN;default:false" json:"isCompleted"`                 // Matches the is_completed column in the database
-	DueDate     time.Time    `gorm:"column:due_date;type:TIMESTAMP" json:"dueDate"`                                     // Matches the due_date column in the database
-	Priority    Priority     `gorm:"column:priority;type:priority;not null" json:"priority"`                            // Matches the priority column as ENUM
-	CreatedAt   time.Time    `gorm:"column:created_at;default:CURRENT_TIMESTAMP" json:"createdAt"`                      // Tracks the creation time
-	UpdatedAt   time.Time    `gorm:"column:updated_at;default:CURRENT_TIMESTAMP" json:"updatedAt"`                      // Tracks the update time
-	Members     []TodoMember `gorm:"many2many:todo_members;joinForeignKey:TodoId;joinReferences:UserId" json:"members"` // For TodoMember association
+	UserId      int          `gorm:"column:user_id;not null" json:"userId"`                             // Matches the user_id foreign key in the database
+	Title       string       `gorm:"column:title;type:VARCHAR(255);not null" json:"title"`              // Matches the title column in the database
+	Description string       `gorm:"column:description;type:TEXT" json:"description"`                   // Matches the description column in the database
+	IsCompleted bool         `gorm:"column:is_completed;type:BOOLEAN;default:false" json:"isCompleted"` // Matches the is_completed column in the database
+	DueDate     time.Time    `gorm:"column:due_date;type:TIMESTAMP" json:"dueDate"`                     // Matches the due_date column in the database
+	Priority    Priority     `gorm:"column:priority;type:priority;not null" json:"priority"`            // Matches the priority column as ENUM
+	CreatedAt   time.Time    `gorm:"column:created_at;default:CURRENT_TIMESTAMP" json:"createdAt"`      // Tracks the creation time
+	UpdatedAt   time.Time    `gorm:"column:updated_at;default:CURRENT_TIMESTAMP" json:"updatedAt"`      // Tracks the update time
+	Members     []TodoMember `gorm:"foreignKey:TodoId;references:Id" json:"members"`                    // For TodoMember association
 }
+
+// title, description, isCompleted, dueDate, priority
 
 type TodoMember struct {
 	// ID     uint       `gorm:"primaryKey"`
-	TodoId int        `gorm:"column:todo_id;not null"`
+	TodoId int        `gorm:"column:todo_id;not null" json:"-"`
 	UserId int        `gorm:"column:user_id; not null"`
 	Role   MemberRole `gorm:"column:role"`
 }

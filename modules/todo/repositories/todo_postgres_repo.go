@@ -101,25 +101,73 @@ func (tdr *TodoPostgresRepository) InsertBatch(in []*entities.Todo) error {
 	return nil
 }
 
-func (tdr *TodoPostgresRepository) FindById(id string) (*entities.Todo, error) {
-	return nil, nil
-}
+func (tdr *TodoPostgresRepository) FindById(id int) (*entities.Todo, error) {
+	var todo *entities.Todo
 
-func (tdr *TodoPostgresRepository) FindAllByUserId(userId int) ([]*entities.Todo, error) {
-	var todos []*entities.Todo
-	fmt.Printf("User ID: %d", userId)
-
-	result := tdr.db.GetDb().Where("user_id = ?", userId).Find(&todos)
-
-	fmt.Println(result)
+	result := tdr.db.GetDb().
+		Preload("Members").
+		Where("id = ?", id).
+		First(&todo)
 
 	if result.Error != nil {
 		return nil, result.Error
 	}
+
+	return todo, nil
+}
+
+func (tdr *TodoPostgresRepository) FindAllByUserId(userId int) ([]*entities.Todo, error) {
+	var todos []*entities.Todo
+
+	result := tdr.db.GetDb().
+		Preload("Members").
+		Where("todos.user_id = ?", userId).
+		Find(&todos)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
 	return todos, nil
 }
 
-func (tdr *TodoPostgresRepository) UpdateTodo(id string, sample *models.UpdateTodoSample) error {
+func (tdr *TodoPostgresRepository) UpdateTodo(id int, sample *models.UpdateTodoSample) error {
+	sampleMap := map[string]interface{}{}
+
+	if sample.Title != nil {
+		sampleMap["title"] = *sample.Title
+	}
+
+	if sample.Description != nil {
+		sampleMap["description"] = *sample.Description
+	}
+
+	if sample.IsCompleted != nil {
+		sampleMap["is_completed"] = *sample.IsCompleted
+	}
+
+	if sample.DueDate != nil {
+		sampleMap["due_date"] = *sample.DueDate
+	}
+
+	if sample.Priority != nil {
+		sampleMap["priority"] = *sample.Priority
+	}
+
+	if len(sampleMap) == 0 {
+		return fmt.Errorf("no fields to update")
+	}
+
+	result := tdr.db.GetDb().Model(&entities.Todo{}).Where("id = ?", id).Updates(sampleMap)
+
+	if result.Error != nil {
+		return fmt.Errorf("failed to update todo: %v", result.Error)
+	}
+
+	if result.RowsAffected == 0 {
+		return fmt.Errorf("Todo not found to update")
+	}
+
 	return nil
 }
 
