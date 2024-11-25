@@ -17,14 +17,11 @@ type TodoHttp struct {
 func (tdHttp *TodoHttp) CreateNewTodo(ctx echo.Context) error {
 	body := new(models.InsertTodoSample)
 
-	fmt.Println("Clm no")
-
 	if err := ctx.Bind(body); err != nil {
 		return err
 	}
 
 	stdCxt := ctx.Request().Context()
-
 	todoId, err := tdHttp.Uc.Insert(stdCxt, body)
 
 	if err != nil {
